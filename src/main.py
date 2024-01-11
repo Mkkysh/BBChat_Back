@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+from src.auth.router import router as auth_router
 
-@app.get("/")
-def test():
-    return {"message": "Hello World"}
+app = FastAPI(root_path="/api")
+
+app.include_router(auth_router)
