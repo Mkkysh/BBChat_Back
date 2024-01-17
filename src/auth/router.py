@@ -14,6 +14,6 @@ router = APIRouter(
 @router.post("/signup")
 async def signup(signup: SignUp, 
                  session: AsyncSession = Depends(get_async_session)):
-    await authService.signup(session, signup)
+    token = await authService.signup(session, signup)
     return JSONResponse(status_code=201,
-                        content={"message": "ok"})
+                        content={"token": token})

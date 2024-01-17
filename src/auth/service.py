@@ -1,7 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert
 from fastapi import HTTPException
+import jwt
 
+from src.config import JWT_SECRET, ALGORITHM
 from src.auth.schemas import SignUp
 from src.auth.hasher import pwd_context
 from src.user.model import User
@@ -20,5 +22,9 @@ class AuthService:
 
         await session.execute(stmt)
         await session.commit()
+
+        token = jwt.encode(payload={'sub': signup.email}, key=JWT_SECRET, algorithm=ALGORITHM)
+
+        return token
 
 authService = AuthService()
