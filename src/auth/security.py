@@ -44,12 +44,13 @@ async def check_access_token(
         raise HTTPException(status_code=401, detail="token is invalid")
 
     
-    userQuery = select(User).where(User.email == payload['sub'])
-    userAns = await session.execute(userQuery)
-    user = userAns.first()
+    user = await session.scalar(select(User)
+                                .where(User.email == payload["email"]))
 
     if user is None:
         raise HTTPException(status_code=401, detail="token is invalid")
+    
+    print(user)
 
     request.state.user = user
 

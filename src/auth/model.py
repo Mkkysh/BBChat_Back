@@ -13,8 +13,9 @@ class RefreshToken(Base):
     __tablename__ = "refreshToken"
 
     jti: Mapped[str] = mapped_column(primary_key=True)
-    token: Mapped[str]
-    rewoked: Mapped[bool]
+    token: Mapped[str] = mapped_column(nullable=False)
+    rewoked: Mapped[bool] = mapped_column(nullable=False)
+    user_agent: Mapped[str] = mapped_column(nullable=False)
 
     users: Mapped[List["User"]] = relationship(
         back_populates="tokens",
