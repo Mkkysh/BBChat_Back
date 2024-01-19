@@ -4,8 +4,6 @@ from fastapi.responses import JSONResponse
 
 from src.database import get_async_session
 from src.auth.security import check_access_token
-from src.auth.schemas import SignUp
-from src.auth.service import authService
 
 router = APIRouter(
     prefix="/test/auth",

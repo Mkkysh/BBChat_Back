@@ -2,11 +2,22 @@ from fastapi import Security, Request, Depends, HTTPException
 from fastapi.security.api_key import APIKeyHeader
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+import time
 import jwt
+from datetime import timedelta
+from typing import Any
+import uuid
+from enum import Enum, unique
 
 from src.database import get_async_session
 from src.config import JWT_SECRET, ALGORITHM
 from src.user.model import User
+
+
+@unique
+class TokenType(str, Enum):
+    ACCESS = 'ACCESS'
+    REFRESH = 'REFRESH'
 
 async def check_access_token(
     request: Request,
@@ -25,9 +36,15 @@ async def check_access_token(
         payload = jwt.decode(jwt=clear_token, key=JWT_SECRET, algorithms=ALGORITHM)
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="token is invalid")
+    
+    try:
+        if payload['type'] != TokenType.ACCESS.value:
+            raise HTTPException(status_code=401, detail="token is invalid")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="token is invalid")
 
     
-    userQuery = select(User).where(User.c.email == payload['sub'])
+    userQuery = select(User).where(User.email == payload['sub'])
     userAns = await session.execute(userQuery)
     user = userAns.first()
 
@@ -39,3 +56,38 @@ async def check_access_token(
     await session.commit()
 
     return authorization_header
+
+
+def sign_token(
+    type: str, subject: str,
+    payload: dict[str, Any]={},
+    ttl: timedelta=None
+) -> str:
+    """
+    Keyword arguments:
+    type -- тип токена(access/refresh);
+    subject -- субъект, на которого выписывается токен;
+    payload -- полезная нагрузка, которую хочется добавить в токен;
+    ttl -- время жизни токена
+    """
+    current_timestamp = time.time()
+        
+    data = dict(
+ 
+        iss='bb@authservice',
+        sub=subject,
+        type=type,
+   
+        jti=str(uuid.uuid4()),
+  
+        iat=current_timestamp, 
+
+        nbf=payload['nbf'] if payload.get('nbf') else current_timestamp
+    )
+
+    data.update(dict(exp=data['nbf'] + int(ttl.total_seconds()))) if ttl else None
+
+    payload.update(data)
+    
+    return jwt.encode(payload=payload, key=JWT_SECRET, algorithm=ALGORITHM)
+
