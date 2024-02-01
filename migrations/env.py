@@ -8,6 +8,7 @@ from alembic import context
 from src.config import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASS
 from src.user.model import User # noqa
 from src.auth.model import RefreshToken, RefreshTokenUser # noqa
+from src.chat.model import Room, UserRoom, Message # noqa
 from src.database import Base
 
 # this is the Alembic Config object, which provides

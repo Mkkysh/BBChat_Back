@@ -6,7 +6,7 @@ from datetime import timedelta
 import jwt
 
 from src.config import JWT_SECRET, ALGORITHM, ACCESS_TTL, REFRESH_TTL
-from src.auth.schemas import SignUp, Tokens, Login
+from src.auth.schema import SignUp, Tokens, Login
 from src.auth.hasher import pwd_context
 from src.user.model import User
 from src.auth.security import sign_token, TokenType

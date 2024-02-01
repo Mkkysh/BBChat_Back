@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse, Response
 from fastapi.exceptions import HTTPException
 
 from src.database import get_async_session
-from src.auth.schemas import SignUp, Tokens, Login
+from src.auth.schema import SignUp, Tokens, Login
 from src.auth.service import get_auth_service, AuthService
 from src.config import REFRESH_TTL
 from src.auth.security import check_access_token
@@ -73,8 +73,6 @@ async def logout(request: Request,
 
     user_agent = request.headers.get("user-agent")
 
-    print(request.state.user)
-    print(user_agent)
     email = request.state.user.email
 
     await service.logout(session, email, user_agent)
@@ -82,4 +80,4 @@ async def logout(request: Request,
     response.delete_cookie("refresh_token", httponly=True, secure=True)
 
     return {"message": "ok"}
-    
+
